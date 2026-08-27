@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	EmptyItemsErr = errors.New("empty items")
+	ErrEmptyItems = errors.New("empty items")
 )
 
 type Tx struct {
@@ -63,7 +63,7 @@ func (tx *Tx) Update(key map[string]types.AttributeValue, updExp string, opts ..
 
 func (tx *Tx) Commit(ctx context.Context) (*dynamodb.TransactWriteItemsOutput, error) {
 	if len(tx.items) == 0 {
-		return nil, EmptyItemsErr
+		return nil, ErrEmptyItems
 	}
 
 	req := &dynamodb.TransactWriteItemsInput{

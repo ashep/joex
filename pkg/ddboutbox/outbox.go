@@ -17,7 +17,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var NoNMoreItemsErr = errors.New("no more items found")
+var ErrNoNMoreItems = errors.New("no more items found")
 
 type txItemProvider[T any] func(T) (*types.TransactWriteItem, error)
 
@@ -168,7 +168,7 @@ func (o *Outbox[T]) Run(ctx context.Context) error {
 		sleep = o.pollPeriod
 
 		item, err := o.nextItem(ctx)
-		if errors.Is(err, NoNMoreItemsErr) {
+		if errors.Is(err, ErrNoNMoreItems) {
 			continue
 		} else if err != nil {
 			o.l.Error().Err(err).Msg("failed to get next item")
@@ -208,7 +208,7 @@ func (o *Outbox[T]) nextItem(ctx context.Context) (ddbItem, error) {
 	}
 
 	if len(out.Items) == 0 {
-		return ddbItem{}, NoNMoreItemsErr
+		return ddbItem{}, ErrNoNMoreItems
 	}
 
 	res := ddbItem{}

@@ -46,7 +46,7 @@ func (h *Handler) CreatePipeline(
 		UpdatedAt: typeutil.UnixTimeMs(now),
 	}
 	if err := p.Validate(); err != nil {
-		return nil, connecterr.New(fmt.Errorf("new pipeline: %w"), h.now)
+		return nil, connecterr.New(fmt.Errorf("new pipeline: %w", err), h.now)
 	}
 
 	if err := h.svc.Create(ctx, p); err != nil {

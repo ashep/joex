@@ -1,6 +1,6 @@
 module github.com/ashep/joex
 
-go 1.26.4
+go 1.26.7
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260709200747-435963d16310.1

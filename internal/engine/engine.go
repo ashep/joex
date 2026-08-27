@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var UnsupportedEngineTypeErr = errors.New("unsupported engine type")
+var ErrUnsupportedEngineType = errors.New("unsupported engine type")
 
 const (
 	Unknown Type = "unknown"
@@ -26,7 +26,7 @@ func ValidateType(e Type) error {
 	case JS:
 		return nil
 	default:
-		return UnsupportedEngineTypeErr
+		return ErrUnsupportedEngineType
 	}
 }
 
@@ -36,7 +36,7 @@ func ValidateOpts(e Type, opts datatype.VarMap) error {
 		_, err := jsengine.ValidateOpts(opts)
 		return err
 	default:
-		return UnsupportedEngineTypeErr
+		return ErrUnsupportedEngineType
 	}
 }
 
@@ -45,7 +45,7 @@ func ValidateArgs(e Type, args datatype.VarMap) error {
 	case JS:
 		return jsengine.ValidateArgs(args)
 	default:
-		return UnsupportedEngineTypeErr
+		return ErrUnsupportedEngineType
 	}
 }
 
@@ -54,6 +54,6 @@ func New(e Type, opts datatype.VarMap, l zerolog.Logger) (Engine, error) {
 	case JS:
 		return jsengine.New(opts, l.With().Str("engine", string(e)).Logger())
 	default:
-		return nil, UnsupportedEngineTypeErr
+		return nil, ErrUnsupportedEngineType
 	}
 }

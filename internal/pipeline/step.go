@@ -9,7 +9,7 @@ import (
 	"github.com/ashep/joex/internal/engine"
 )
 
-var StepNotFoundError = errors.New("step not found")
+var ErrStepNotFound = errors.New("step not found")
 
 type Step struct {
 	ID        int             `json:"id" dynamodbav:"id"`

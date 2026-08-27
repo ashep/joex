@@ -50,7 +50,7 @@ func (p Pipeline) Validate() error {
 
 func (p Pipeline) Step(id int) (Step, error) {
 	if id >= len(p.Steps) || id < 0 {
-		return Step{}, StepNotFoundError
+		return Step{}, ErrStepNotFound
 	}
 
 	return p.Steps[id], nil
