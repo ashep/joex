@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateTask(main *testing.T) {
+func TestJobTask(main *testing.T) {
 	main.Parallel()
 
 	main.Run("InvalidAuthorization", func(t *testing.T) {

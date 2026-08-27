@@ -21,7 +21,6 @@ type TestApp struct {
 	t   *testing.T
 	cfg app.Config
 	rnr tRunner
-	db  *TestDB
 }
 
 type ConfigOption func(*app.Config)
@@ -29,10 +28,11 @@ type ConfigOption func(*app.Config)
 func New(t *testing.T, opts ...ConfigOption) *TestApp {
 	t.Helper()
 
-	db := newDB(t)
 	cfg := app.Config{
 		Database: app.DatabaseConfig{
-			DSN: db.DSN,
+			DDB: app.DatabaseDDBConfig{
+				Table: "test",
+			},
 		},
 		Server: app.ServerConfig{
 			Addr: testrunner.RandLocalTCPAddr(t).String(),
@@ -54,7 +54,6 @@ func New(t *testing.T, opts ...ConfigOption) *TestApp {
 		t:   t,
 		cfg: cfg,
 		rnr: rnr,
-		db:  db,
 	}
 
 	return ta

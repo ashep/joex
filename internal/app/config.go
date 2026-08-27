@@ -20,7 +20,6 @@ type DatabaseDDBConfig struct {
 }
 
 type DatabaseConfig struct {
-	DSN string
 	DDB DatabaseDDBConfig
 }
 
