@@ -1,0 +1,7 @@
+.ci
+go.work
+go.work.sum
+.env
+config.yml
+vendor/
+tmp/

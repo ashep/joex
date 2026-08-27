@@ -1,0 +1,13 @@
+services:
+  tests:
+    image: golang:1.26-alpine3.24
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./
+        target: /src
+    working_dir: /src

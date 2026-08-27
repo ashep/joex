@@ -1,0 +1,17 @@
+syntax = "proto3";
+package joex.v1;
+
+import "buf/validate/validate.proto";
+
+enum DataType {
+  DATA_TYPE_UNSPECIFIED = 0;
+  DATA_TYPE_BOOL = 1;
+  DATA_TYPE_INT = 2;
+  DATA_TYPE_FLOAT = 3;
+  DATA_TYPE_STRING = 4;
+}
+
+message Arg {
+  DataType type  = 1 [(buf.validate.field).required = true];
+  string value = 2 [(buf.validate.field).required = true];
+}

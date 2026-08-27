@@ -1,0 +1,30 @@
+syntax = "proto3";
+package joex.v1;
+
+import "buf/validate/validate.proto";
+import "joex/v1/datatype.proto";
+
+enum Engine {
+  ENGINE_UNSPECIFIED = 0;
+  ENGINE_JS = 1;
+};
+
+message Step {
+  Engine engine = 1 [(buf.validate.field).required = true];
+  map<string, Arg> opts = 2;
+  bool allow_fail = 3;
+};
+
+message CreatePipelineRequest {
+  repeated Step steps = 1 [
+    (buf.validate.field).repeated.min_items = 1
+  ];
+}
+
+message CreatePipelineResponse {
+  string id = 1;
+}
+
+service PipelineService {
+  rpc CreatePipeline(CreatePipelineRequest) returns (CreatePipelineResponse);
+}
