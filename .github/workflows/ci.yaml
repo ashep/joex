@@ -8,6 +8,9 @@ jobs:
 
   test:
     uses: ashep/ci/.github/workflows/go-test.yaml@v1
+    secrets:
+      dotenv: |
+        LOCALSTACK_AUTH_TOKEN=${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
   build:
     needs:

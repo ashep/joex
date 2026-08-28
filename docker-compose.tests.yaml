@@ -1,8 +1,39 @@
 services:
   tests:
     image: golang:1.26-alpine3.24
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
     volumes:
       - type: bind
         source: ./
         target: /src
     working_dir: /src
+
+  localstack:
+    image: localstack/localstack:latest
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "curl -s http://localhost:4566/_localstack/health | grep -q '\"dynamodb\": \"available\"'"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - SERVICES=dynamodb
+      - DEBUG=1
+      - PERSISTENCE=1     # optional: persist data across restarts
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+volumes:
+  localstack:
