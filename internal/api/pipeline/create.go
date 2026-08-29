@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	apperr "github.com/ashep/go-app/errors"
 	"github.com/ashep/joex/internal/apiutil"
 	"github.com/ashep/joex/internal/pipeline"
 	"github.com/ashep/joex/internal/status"
@@ -24,14 +23,12 @@ func (h *Handler) CreatePipeline(
 	for i, reqStep := range req.GetSteps() {
 		stepOpts, err := apiutil.MapProtoDataTypeArgs(reqStep.GetOpts())
 		if err != nil {
-			h.l.Error().Err(err).Msg("map step opts failed")
-			return nil, connecterr.New(apperr.NewInvalidArg(fmt.Sprintf("steps[%d].opts", i), err.Error()), h.l)
+			return nil, connecterr.New(fmt.Errorf("steps[%d].opts: %w", i, err), h.l)
 		}
 
 		step, err := pipeline.MakeStep(i, mapStepEngine(reqStep.GetEngine()), stepOpts, reqStep.GetAllowFail())
 		if err != nil {
-			h.l.Error().Err(err).Msgf("make task %d failed", i)
-			return nil, connecterr.New(err, h.l)
+			return nil, connecterr.New(fmt.Errorf("steps[%d]: %w", i, err), h.l)
 		}
 
 		steps = append(steps, step)

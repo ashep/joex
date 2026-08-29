@@ -2,7 +2,6 @@ package pipeline
 
 import (
 	"errors"
-	"fmt"
 
 	apperr "github.com/ashep/go-app/errors"
 	"github.com/ashep/joex/internal/datatype"
@@ -35,7 +34,7 @@ func MakeStep(id int, e engine.Type, opts datatype.VarMap, allowFail bool) (Step
 
 func (s Step) Validate() error {
 	if err := engine.ValidateOpts(s.Engine, s.Opts); err != nil {
-		return fmt.Errorf("opts: %w", err)
+		return err
 	}
 
 	return nil

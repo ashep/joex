@@ -1,18 +1,15 @@
 package engine
 
 import (
-	"errors"
-
+	apperr "github.com/ashep/go-app/errors"
 	"github.com/ashep/joex/internal/datatype"
 	"github.com/ashep/joex/internal/engine/jsengine"
 	"github.com/rs/zerolog"
 )
 
-var ErrUnsupportedEngineType = errors.New("unsupported engine type")
-
 const (
-	Unknown Type = "unknown"
-	JS      Type = "js"
+	Unspecified Type = "unspecified"
+	JS          Type = "js"
 )
 
 type Engine interface {
@@ -26,7 +23,7 @@ func ValidateType(e Type) error {
 	case JS:
 		return nil
 	default:
-		return ErrUnsupportedEngineType
+		return apperr.NewInvalidArg(string(e), "unsupported engine")
 	}
 }
 
@@ -36,7 +33,7 @@ func ValidateOpts(e Type, opts datatype.VarMap) error {
 		_, err := jsengine.ValidateOpts(opts)
 		return err
 	default:
-		return ErrUnsupportedEngineType
+		return apperr.NewInvalidArg(string(e), "unsupported engine")
 	}
 }
 
@@ -45,7 +42,7 @@ func ValidateArgs(e Type, args datatype.VarMap) error {
 	case JS:
 		return jsengine.ValidateArgs(args)
 	default:
-		return ErrUnsupportedEngineType
+		return apperr.NewInvalidArg(string(e), "unsupported engine")
 	}
 }
 
@@ -54,6 +51,6 @@ func New(e Type, opts datatype.VarMap, l zerolog.Logger) (Engine, error) {
 	case JS:
 		return jsengine.New(opts, l.With().Str("engine", string(e)).Logger())
 	default:
-		return nil, ErrUnsupportedEngineType
+		return nil, apperr.NewInvalidArg(string(e), "unsupported engine")
 	}
 }

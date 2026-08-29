@@ -33,6 +33,6 @@ func mapStepEngine(pt proto.Engine) engine.Type {
 	case proto.Engine_ENGINE_JS:
 		return engine.JS
 	default:
-		return engine.Unknown
+		return engine.Unspecified
 	}
 }
