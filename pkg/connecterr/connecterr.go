@@ -2,25 +2,32 @@ package connecterr
 
 import (
 	"errors"
-	"fmt"
-	"time"
 
 	"connectrpc.com/connect"
 	apperr "github.com/ashep/go-app/errors"
+	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 )
 
-func New(err error, now func() time.Time) *connect.Error {
+type errCodeGen func() string
+
+var ErrorCodeGenerator errCodeGen = uuid.NewString
+
+func New(err error, l zerolog.Logger) *connect.Error {
 	if err == nil {
 		return nil
 	}
 
-	if tErr, ok := errors.AsType[apperr.InvalidArgError](err); ok {
-		return connect.NewError(connect.CodeInvalidArgument, tErr)
+	if _, ok := errors.AsType[apperr.InvalidArgError](err); ok {
+		return connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	if tErr, ok := errors.AsType[apperr.NotFoundError](err); ok {
-		return connect.NewError(connect.CodeNotFound, tErr)
+	if _, ok := errors.AsType[apperr.NotFoundError](err); ok {
+		return connect.NewError(connect.CodeNotFound, err)
 	}
 
-	return connect.NewError(connect.CodeInternal, fmt.Errorf("internal error: %d", now().UnixMilli()))
+	code := ErrorCodeGenerator()
+	l.Error().Err(err).Str("err_code", code).Msg("internal error")
+
+	return connect.NewError(connect.CodeInternal, errors.New("Error "+code))
 }

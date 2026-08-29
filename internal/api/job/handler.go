@@ -19,9 +19,9 @@ type Handler struct {
 	l      zerolog.Logger
 }
 
-func New(pipSvc jobService, now func() time.Time, l zerolog.Logger) *Handler {
+func New(jobSvc jobService, now func() time.Time, l zerolog.Logger) *Handler {
 	return &Handler{
-		jobSvc: pipSvc,
+		jobSvc: jobSvc,
 		now:    now,
 		l:      l,
 	}

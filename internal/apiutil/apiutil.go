@@ -1,7 +1,6 @@
 package apiutil
 
 import (
-	apperr "github.com/ashep/go-app/errors"
 	"github.com/ashep/joex/internal/datatype"
 	proto "github.com/ashep/joex/sdk/proto/joex/v1"
 )
@@ -10,7 +9,7 @@ func MapProtoDataTypeArgs(args map[string]*proto.Arg) (datatype.VarMap, error) {
 	res := make(datatype.VarMap, len(args))
 	for name, opt := range args {
 		if err := res.Set(name, mapDataType(args[name].GetType()), opt.Value); err != nil {
-			return nil, apperr.NewInvalidArg(name, err.Error())
+			return nil, err
 		}
 	}
 	return res, nil

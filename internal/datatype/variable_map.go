@@ -18,14 +18,26 @@ func (m VarMap) Set(key string, typ Type, val string) error {
 	switch typ {
 	case Bool:
 		v, err = NewBool(val)
+		if err != nil {
+			err = apperr.NewInvalidArg(key, err.Error())
+		}
 	case Int:
 		v, err = NewInt(val)
+		if err != nil {
+			err = apperr.NewInvalidArg(key, err.Error())
+		}
 	case Float:
 		v, err = NewFloat(val)
+		if err != nil {
+			err = apperr.NewInvalidArg(key, err.Error())
+		}
 	case String:
 		v = NewString(val)
+		if err != nil {
+			err = apperr.NewInvalidArg(key, err.Error())
+		}
 	default:
-		err = apperr.NewInvalidArg("typ", "unexpected type")
+		err = apperr.NewInvalidArg(key, "unexpected type: "+string(typ))
 	}
 
 	if err != nil {

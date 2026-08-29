@@ -12,10 +12,11 @@ import (
 
 type TypeError struct {
 	Expected Type
+	Actual   Type
 }
 
 func (e *TypeError) Error() string {
-	return fmt.Sprintf("is not %s", e.Expected)
+	return fmt.Sprintf("is not %s, but %s", e.Expected, e.Actual)
 }
 
 type NotDefinedError struct {
@@ -29,7 +30,7 @@ func (e *NotDefinedError) Error() string {
 type Type string
 
 const (
-	Unknown Type = ""
+	Unknown Type = "unspecified"
 	Bool    Type = "bool"
 	Int     Type = "int"
 	Float   Type = "float"
@@ -43,28 +44,28 @@ type Var struct {
 
 func (v Var) Bool() (bool, error) {
 	if v.Type != Bool {
-		return false, &TypeError{Expected: Bool}
+		return false, &TypeError{Expected: Bool, Actual: v.Type}
 	}
 	return v.Value.(bool), nil
 }
 
 func (v Var) Int() (int, error) {
 	if v.Type != Int {
-		return 0, &TypeError{Expected: Int}
+		return 0, &TypeError{Expected: Int, Actual: v.Type}
 	}
 	return v.Value.(int), nil
 }
 
 func (v Var) Float() (float64, error) {
 	if v.Type != Float {
-		return 0, &TypeError{Expected: Float}
+		return 0, &TypeError{Expected: Float, Actual: v.Type}
 	}
 	return v.Value.(float64), nil
 }
 
 func (v Var) String() (string, error) {
 	if v.Type != String {
-		return "", &TypeError{Expected: String}
+		return "", &TypeError{Expected: String, Actual: v.Type}
 	}
 	return v.Value.(string), nil
 }

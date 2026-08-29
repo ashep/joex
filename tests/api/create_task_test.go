@@ -10,14 +10,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJobTask(main *testing.T) {
+func TestCreateJob(main *testing.T) {
 	main.Parallel()
 
-	main.Run("InvalidAuthorization", func(t *testing.T) {
+	main.Run("EmptyAuthorizationToken", func(t *testing.T) {
 		t.Parallel()
 		ta := testapp.New(t)
 
-		cli := ta.TaskClient("anInvalidAuthToken")
+		cli := ta.NewJobServiceClient("")
+		_, err := cli.CreateJob(t.Context(), &jobproto.CreateJobRequest{})
+
+		assert.EqualError(t, err, "unauthenticated: unauthenticated")
+		ta.AssertNoWarnsAndErrors()
+	})
+
+	main.Run("InvalidAuthorizationToken", func(t *testing.T) {
+		t.Parallel()
+		ta := testapp.New(t)
+
+		cli := ta.NewJobServiceClient("anInvalidAuthToken")
 		_, err := cli.CreateJob(t.Context(), &jobproto.CreateJobRequest{})
 
 		assert.EqualError(t, err, "unauthenticated: unauthenticated")

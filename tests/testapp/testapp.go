@@ -18,8 +18,9 @@ type tRunner interface {
 }
 
 type TestApp struct {
+	Cfg app.Config
+
 	t   *testing.T
-	cfg app.Config
 	rnr tRunner
 }
 
@@ -52,7 +53,7 @@ func New(t *testing.T, opts ...ConfigOption) *TestApp {
 
 	ta := &TestApp{
 		t:   t,
-		cfg: cfg,
+		Cfg: cfg,
 		rnr: rnr,
 	}
 
@@ -63,14 +64,10 @@ func (ta *TestApp) AssertNoWarnsAndErrors() {
 	ta.rnr.Logger().AssertNoWarnsAndErrors()
 }
 
-func (ta *TestApp) TaskClient(apiKey string) joexv1connect.JobServiceClient {
-	if apiKey == "" {
-		apiKey = ta.cfg.Server.Auth.APIKey
-	}
-
+func (ta *TestApp) NewJobServiceClient(apiKey string) joexv1connect.JobServiceClient {
 	icps := connect.WithInterceptors(auth.NewAPIKeyInterceptor(map[string]string{
 		"default": apiKey,
 	}))
 
-	return joexv1connect.NewJobServiceClient(http.DefaultClient, "http://"+ta.cfg.Server.Addr, icps)
+	return joexv1connect.NewJobServiceClient(http.DefaultClient, "http://"+ta.Cfg.Server.Addr, icps)
 }

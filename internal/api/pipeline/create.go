@@ -25,13 +25,13 @@ func (h *Handler) CreatePipeline(
 		stepOpts, err := apiutil.MapProtoDataTypeArgs(reqStep.GetOpts())
 		if err != nil {
 			h.l.Error().Err(err).Msg("map step opts failed")
-			return nil, connecterr.New(apperr.NewInvalidArg(fmt.Sprintf("steps[%d].opts", i), err.Error()), h.now)
+			return nil, connecterr.New(apperr.NewInvalidArg(fmt.Sprintf("steps[%d].opts", i), err.Error()), h.l)
 		}
 
 		step, err := pipeline.MakeStep(i, mapStepEngine(reqStep.GetEngine()), stepOpts, reqStep.GetAllowFail())
 		if err != nil {
 			h.l.Error().Err(err).Msgf("make task %d failed", i)
-			return nil, connecterr.New(err, h.now)
+			return nil, connecterr.New(err, h.l)
 		}
 
 		steps = append(steps, step)
@@ -46,12 +46,12 @@ func (h *Handler) CreatePipeline(
 		UpdatedAt: typeutil.UnixTimeMs(now),
 	}
 	if err := p.Validate(); err != nil {
-		return nil, connecterr.New(fmt.Errorf("new pipeline: %w", err), h.now)
+		return nil, connecterr.New(fmt.Errorf("new pipeline: %w", err), h.l)
 	}
 
 	if err := h.svc.Create(ctx, p); err != nil {
 		h.l.Error().Err(err).Msg("create pipeline failed")
-		return nil, connecterr.New(err, h.now)
+		return nil, connecterr.New(err, h.l)
 	}
 
 	h.l.Info().Str("pipeline_id", p.ID).Msg("pipeline created")
