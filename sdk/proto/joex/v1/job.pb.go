@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -80,7 +81,7 @@ func (JobStatus) EnumDescriptor() ([]byte, []int) {
 type CreateJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PipelineId    string                 `protobuf:"bytes,1,opt,name=pipeline_id,json=pipelineId,proto3" json:"pipeline_id,omitempty"`
-	Args          map[string]*Arg        `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Args          *structpb.Struct       `protobuf:"bytes,2,opt,name=args,proto3" json:"args,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,7 +123,7 @@ func (x *CreateJobRequest) GetPipelineId() string {
 	return ""
 }
 
-func (x *CreateJobRequest) GetArgs() map[string]*Arg {
+func (x *CreateJobRequest) GetArgs() *structpb.Struct {
 	if x != nil {
 		return x.Args
 	}
@@ -273,14 +274,11 @@ var File_joex_v1_job_proto protoreflect.FileDescriptor
 
 const file_joex_v1_job_proto_rawDesc = "" +
 	"\n" +
-	"\x11joex/v1/job.proto\x12\ajoex.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16joex/v1/datatype.proto\"\xbb\x01\n" +
+	"\x11joex/v1/job.proto\x12\ajoex.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1bbuf/validate/validate.proto\"h\n" +
 	"\x10CreateJobRequest\x12'\n" +
 	"\vpipeline_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"pipelineId\x127\n" +
-	"\x04args\x18\x02 \x03(\v2#.joex.v1.CreateJobRequest.ArgsEntryR\x04args\x1aE\n" +
-	"\tArgsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\"\n" +
-	"\x05value\x18\x02 \x01(\v2\f.joex.v1.ArgR\x05value:\x028\x01\"*\n" +
+	"pipelineId\x12+\n" +
+	"\x04args\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x04args\"*\n" +
 	"\x11CreateJobResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"&\n" +
 	"\rGetJobRequest\x12\x15\n" +
@@ -312,27 +310,25 @@ func file_joex_v1_job_proto_rawDescGZIP() []byte {
 }
 
 var file_joex_v1_job_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_joex_v1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_joex_v1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_joex_v1_job_proto_goTypes = []any{
 	(JobStatus)(0),            // 0: joex.v1.JobStatus
 	(*CreateJobRequest)(nil),  // 1: joex.v1.CreateJobRequest
 	(*CreateJobResponse)(nil), // 2: joex.v1.CreateJobResponse
 	(*GetJobRequest)(nil),     // 3: joex.v1.GetJobRequest
 	(*GetJobResponse)(nil),    // 4: joex.v1.GetJobResponse
-	nil,                       // 5: joex.v1.CreateJobRequest.ArgsEntry
-	(*Arg)(nil),               // 6: joex.v1.Arg
+	(*structpb.Struct)(nil),   // 5: google.protobuf.Struct
 }
 var file_joex_v1_job_proto_depIdxs = []int32{
-	5, // 0: joex.v1.CreateJobRequest.args:type_name -> joex.v1.CreateJobRequest.ArgsEntry
+	5, // 0: joex.v1.CreateJobRequest.args:type_name -> google.protobuf.Struct
 	0, // 1: joex.v1.GetJobResponse.status:type_name -> joex.v1.JobStatus
-	6, // 2: joex.v1.CreateJobRequest.ArgsEntry.value:type_name -> joex.v1.Arg
-	1, // 3: joex.v1.JobService.CreateJob:input_type -> joex.v1.CreateJobRequest
-	2, // 4: joex.v1.JobService.CreateJob:output_type -> joex.v1.CreateJobResponse
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	1, // 2: joex.v1.JobService.CreateJob:input_type -> joex.v1.CreateJobRequest
+	2, // 3: joex.v1.JobService.CreateJob:output_type -> joex.v1.CreateJobResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_joex_v1_job_proto_init() }
@@ -340,14 +336,13 @@ func file_joex_v1_job_proto_init() {
 	if File_joex_v1_job_proto != nil {
 		return
 	}
-	file_joex_v1_datatype_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_joex_v1_job_proto_rawDesc), len(file_joex_v1_job_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   5,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

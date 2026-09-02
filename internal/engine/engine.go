@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"io"
+
 	apperr "github.com/ashep/go-app/errors"
 	"github.com/ashep/joex/internal/datatype"
 	"github.com/ashep/joex/internal/engine/jsengine"
@@ -46,10 +48,10 @@ func ValidateArgs(e Type, args datatype.VarMap) error {
 	}
 }
 
-func New(e Type, opts datatype.VarMap, l zerolog.Logger) (Engine, error) {
+func New(e Type, opts datatype.VarMap, taskLog io.WriteCloser, l zerolog.Logger) (Engine, error) {
 	switch e {
 	case JS:
-		return jsengine.New(opts, l.With().Str("engine", string(e)).Logger())
+		return jsengine.New(opts, taskLog, l.With().Str("engine", string(e)).Logger())
 	default:
 		return nil, apperr.NewInvalidArg(string(e), "unsupported engine")
 	}

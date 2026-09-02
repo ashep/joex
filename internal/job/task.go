@@ -20,6 +20,7 @@ type Task struct {
 	IsLast     bool                    `json:"is_last" dynamodbav:"is_last"`
 	Status     status.ProcessingStatus `json:"status" dynamodbav:"status"`
 	Result     datatype.VarMap         `json:"result" dynamodbav:"result"`
+	Log        string                  `json:"log" dynamodbav:"log"`
 	CreatedAt  typeutil.UnixTimeMs     `json:"created_at" dynamodbav:"created_at"`
 	UpdatedAt  typeutil.UnixTimeMs     `json:"updated_at" dynamodbav:"updated_at"`
 	Version    int                     `json:"version" dynamodbav:"version"`

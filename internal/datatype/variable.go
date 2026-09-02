@@ -30,11 +30,10 @@ func (e *NotDefinedError) Error() string {
 type Type string
 
 const (
-	Unknown Type = "unspecified"
-	Bool    Type = "bool"
-	Int     Type = "int"
-	Float   Type = "float"
-	String  Type = "string"
+	Unspecified Type = "unspecified"
+	Bool        Type = "bool"
+	Number      Type = "number"
+	String      Type = "string"
 )
 
 type Var struct {
@@ -49,16 +48,9 @@ func (v Var) Bool() (bool, error) {
 	return v.Value.(bool), nil
 }
 
-func (v Var) Int() (int, error) {
-	if v.Type != Int {
-		return 0, &TypeError{Expected: Int, Actual: v.Type}
-	}
-	return v.Value.(int), nil
-}
-
-func (v Var) Float() (float64, error) {
-	if v.Type != Float {
-		return 0, &TypeError{Expected: Float, Actual: v.Type}
+func (v Var) Number() (float64, error) {
+	if v.Type != Number {
+		return 0, &TypeError{Expected: Number, Actual: v.Type}
 	}
 	return v.Value.(float64), nil
 }
@@ -74,9 +66,7 @@ func (v Var) AsString() string {
 	switch v.Type {
 	case Bool:
 		return fmt.Sprintf("%t", v.Value.(bool))
-	case Int:
-		return fmt.Sprintf("%d", v.Value.(int))
-	case Float:
+	case Number:
 		return fmt.Sprintf("%f", v.Value.(float64))
 	case String:
 		return v.Value.(string)
@@ -97,20 +87,12 @@ func NewBool(s string) (Var, error) {
 	}
 }
 
-func NewInt(s string) (Var, error) {
-	i, err := strconv.Atoi(strings.TrimSpace(strings.ToLower(s)))
-	if err != nil {
-		return Var{}, apperr.NewInvalidArg(s, fmt.Sprintf("cannot be converted to an int: %s", err))
-	}
-	return Var{Type: Int, Value: i}, nil
-}
-
-func NewFloat(s string) (Var, error) {
+func NewNumber(s string) (Var, error) {
 	f, err := strconv.ParseFloat(strings.TrimSpace(strings.ToLower(s)), 64)
 	if err != nil {
 		return Var{}, apperr.NewInvalidArg(s, fmt.Sprintf("cannot be converted to a float: %s", err))
 	}
-	return Var{Type: Float, Value: f}, nil
+	return Var{Type: Number, Value: f}, nil
 }
 
 func NewString(s string) Var {
@@ -143,16 +125,10 @@ func (v *Var) UnmarshalDynamoDBAttributeValue(av types.AttributeValue) error {
 			return fmt.Errorf("unmarshal bool: %w", err)
 		}
 		v.Value = b
-	case Int:
-		var i int
-		if err := attributevalue.Unmarshal(valueAV, &i); err != nil {
-			return fmt.Errorf("unmarshal int: %w", err)
-		}
-		v.Value = i
-	case Float:
+	case Number:
 		var f float64
 		if err := attributevalue.Unmarshal(valueAV, &f); err != nil {
-			return fmt.Errorf("unmarshal float: %w", err)
+			return fmt.Errorf("unmarshal number: %w", err)
 		}
 		v.Value = f
 	case String:

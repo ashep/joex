@@ -23,43 +23,46 @@ type jobService interface {
 }
 
 type Scheduler struct {
-	pipeSvc pipelineService
-	jobSvc  jobService
-	now     func() time.Time
-	l       zerolog.Logger
-	stopped chan struct{}
+	pipeSvc      pipelineService
+	jobSvc       jobService
+	pollInterval time.Duration
+	now          func() time.Time
+	l            zerolog.Logger
+	stopped      chan struct{}
 }
 
 func New(
 	pipeSvc pipelineService,
 	jobSvc jobService,
+	pollInterval time.Duration,
 	now func() time.Time,
 	l zerolog.Logger,
 ) *Scheduler {
 	return &Scheduler{
-		pipeSvc: pipeSvc,
-		jobSvc:  jobSvc,
-		now:     now,
-		l:       l,
-		stopped: make(chan struct{}),
+		pipeSvc:      pipeSvc,
+		jobSvc:       jobSvc,
+		pollInterval: pollInterval,
+		now:          now,
+		l:            l,
+		stopped:      make(chan struct{}),
 	}
 }
 
 func (s *Scheduler) Run(ctx context.Context) error {
-	sleep := 0
+	sleep := time.Duration(0)
 
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-time.After(time.Second * time.Duration(sleep)):
+		case <-time.After(sleep):
 		}
 
 		if err := s.run(ctx); err != nil {
 			s.l.Error().Err(err).Send()
 		}
 
-		sleep = 5
+		sleep = s.pollInterval
 	}
 }
 

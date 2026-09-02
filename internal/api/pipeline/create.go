@@ -21,7 +21,7 @@ func (h *Handler) CreatePipeline(
 
 	steps := make([]pipeline.Step, 0, len(req.GetSteps()))
 	for i, reqStep := range req.GetSteps() {
-		stepOpts, err := apiutil.MapProtoDataTypeArgs(reqStep.GetOpts())
+		stepOpts, err := apiutil.MapProtoStructToDataType(reqStep.GetOpts())
 		if err != nil {
 			return nil, connecterr.New(fmt.Errorf("steps[%d].opts: %w", i, err), h.l)
 		}

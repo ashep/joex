@@ -24,9 +24,9 @@ type TestApp struct {
 	rnr tRunner
 }
 
-type ConfigOption func(*app.Config)
+type cfgOpt func(*app.Config)
 
-func New(t *testing.T, opts ...ConfigOption) *TestApp {
+func New(t *testing.T, opts ...cfgOpt) *TestApp {
 	t.Helper()
 
 	cfg := app.Config{
@@ -35,7 +35,7 @@ func New(t *testing.T, opts ...ConfigOption) *TestApp {
 				Table: "test",
 			},
 		},
-		Server: app.ServerConfig{
+		API: app.APIConfig{
 			Addr: testrunner.RandLocalTCPAddr(t).String(),
 			Auth: app.ServerAuthConfig{
 				APIKey: "default",
@@ -48,7 +48,7 @@ func New(t *testing.T, opts ...ConfigOption) *TestApp {
 	}
 
 	rnr := testrunner.New(t, app.Run, cfg).
-		SetHTTPReadyStartWaiter("http://"+cfg.Server.Addr+"/metrics", time.Second*5).
+		SetHTTPReadyStartWaiter("http://"+cfg.API.Addr+"/metrics", time.Second*5).
 		Start()
 
 	ta := &TestApp{
@@ -69,5 +69,5 @@ func (ta *TestApp) NewJobServiceClient(apiKey string) joexv1connect.JobServiceCl
 		"default": apiKey,
 	}))
 
-	return joexv1connect.NewJobServiceClient(http.DefaultClient, "http://"+ta.Cfg.Server.Addr, icps)
+	return joexv1connect.NewJobServiceClient(http.DefaultClient, "http://"+ta.Cfg.API.Addr, icps)
 }

@@ -162,13 +162,7 @@ func (s *Service) FindTasksByStatus(ctx context.Context, status status.Processin
 	return s.repo.FindTasksByStatus(ctx, status, limit)
 }
 
-func (s *Service) CompleteTask(
-	ctx context.Context,
-	jobID string,
-	taskID string,
-	res datatype.VarMap,
-	resErr error,
-) error {
+func (s *Service) CompleteTask(ctx context.Context, jobID string, taskID string, res datatype.VarMap, resErr error, log fmt.Stringer) error {
 	t, err := s.FindTaskByID(ctx, jobID, taskID)
 	if err != nil {
 		return fmt.Errorf("find task: %w", err)
@@ -187,6 +181,7 @@ func (s *Service) CompleteTask(
 	}
 
 	t.Result = res
+	t.Log = log.String()
 	t.UpdatedAt = typeutil.UnixTimeMs(s.now())
 
 	j, err := s.FindJobByID(ctx, t.PipelineID, jobID)

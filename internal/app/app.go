@@ -7,7 +7,9 @@ import (
 
 	"connectrpc.com/connect"
 	"connectrpc.com/validate"
+	"github.com/ashep/go-app/health"
 	"github.com/ashep/go-app/httpserver"
+	"github.com/ashep/go-app/prommetrics"
 	"github.com/ashep/go-app/runner"
 	"github.com/ashep/go-app/taskrunner"
 	jobhandler "github.com/ashep/joex/internal/api/job"
@@ -56,12 +58,16 @@ func Run(rt *runner.Runtime[Config]) error {
 	}
 	jobSvc := job.NewService(pipeSvc, jobRepo, cfg.Now, l)
 
-	if err := startTaskScheduler(rt, tr, pipeSvc, jobSvc); err != nil {
-		return err
+	if cfg.Scheduler.Enabled {
+		if err := startScheduler(rt, tr, pipeSvc, jobSvc); err != nil {
+			return err
+		}
 	}
 
-	if err := startTaskExecutor(rt, tr, jobSvc); err != nil {
-		return err
+	if cfg.Executor.Enabled {
+		if err := startExecutor(rt, tr, jobSvc); err != nil {
+			return err
+		}
 	}
 
 	srv := httpserver.New(
@@ -69,8 +75,16 @@ func Run(rt *runner.Runtime[Config]) error {
 		httpserver.WithHTTP1(true),
 		httpserver.WithUnencryptedHTTP2(true),
 	)
-	srv.Handle(joexconn.NewPipelineServiceHandler(pipelinehandler.New(pipeSvc, cfg.Now, l), icps))
-	srv.Handle(joexconn.NewJobServiceHandler(jobhandler.New(jobSvc, cfg.Now, l), icps))
+
+	health.RegisterServer(srv)
+	prommetrics.RegisterServer(rt.AppName, rt.AppVersion, srv)
+
+	if cfg.API.Enabled {
+		srv.Handle(joexconn.NewPipelineServiceHandler(pipelinehandler.New(pipeSvc, cfg.Now, l), icps))
+		srv.Handle(joexconn.NewJobServiceHandler(jobhandler.New(jobSvc, cfg.Now, l), icps))
+
+		l.Info().Msg("api enabled")
+	}
 
 	l.Info().Str("addr", srv.Listener().Addr().String()).Msg("server addr")
 	if err := tr.Run(rt.Ctx, "server", srv); err != nil {
@@ -80,23 +94,33 @@ func Run(rt *runner.Runtime[Config]) error {
 	return tr.Wait(rt.Ctx)
 }
 
-func startTaskScheduler(rt *runner.Runtime[Config], tr *taskrunner.Runner, pipeSvc *pipeline.Service, jobSvc *job.Service) error {
-	l := rt.Log.With().Str("pkg", "task_scheduler").Logger()
-	taskSched := scheduler.New(pipeSvc, jobSvc, rt.Cfg.Now, l)
+func startScheduler(rt *runner.Runtime[Config], tr *taskrunner.Runner, pipeSvc *pipeline.Service, jobSvc *job.Service) error {
+	s := scheduler.New(
+		pipeSvc,
+		jobSvc,
+		rt.Cfg.Scheduler.PollInterval,
+		rt.Cfg.Now,
+		rt.Log.With().Str("pkg", "scheduler").Logger(),
+	)
 
-	if err := tr.Run(rt.Ctx, "task scheduler", taskSched); err != nil {
-		return fmt.Errorf("start task scheduler: %w", err)
+	if err := tr.Run(rt.Ctx, "scheduler", s); err != nil {
+		return fmt.Errorf("start scheduler: %w", err)
 	}
 
 	return nil
 }
 
-func startTaskExecutor(rt *runner.Runtime[Config], tr *taskrunner.Runner, jobSvc *job.Service) error {
+func startExecutor(rt *runner.Runtime[Config], tr *taskrunner.Runner, jobSvc *job.Service) error {
 	l := rt.Log
 
-	ex := executor.New(jobSvc, l.With().Str("pkg", "task_executor").Logger())
-	if err := tr.Run(rt.Ctx, "task executor", ex); err != nil {
-		return fmt.Errorf("run task executor: %w", err)
+	ex := executor.New(
+		jobSvc,
+		rt.Cfg.Executor.PollInterval,
+		rt.Cfg.Executor.MaxLogSize,
+		l.With().Str("pkg", "executor").Logger(),
+	)
+	if err := tr.Run(rt.Ctx, "executor", ex); err != nil {
+		return fmt.Errorf("run executor: %w", err)
 	}
 
 	return nil
@@ -104,7 +128,7 @@ func startTaskExecutor(rt *runner.Runtime[Config], tr *taskrunner.Runner, jobSvc
 
 func apiKeysFromConfig(cfg *Config) map[string]string {
 	apiKeys := make(map[string]string)
-	apiKeys["default"] = cfg.Server.Auth.APIKey
-	maps.Copy(apiKeys, cfg.Server.Auth.APIKeys)
+	apiKeys["default"] = cfg.API.Auth.APIKey
+	maps.Copy(apiKeys, cfg.API.Auth.APIKeys)
 	return apiKeys
 }

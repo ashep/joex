@@ -14,21 +14,25 @@ import (
 
 type jobService interface {
 	FindTasksByStatus(ctx context.Context, st status.ProcessingStatus, limit int) ([]job.Task, error)
-	CompleteTask(ctx context.Context, jobID string, taskID string, res datatype.VarMap, resErr error) error
+	CompleteTask(ctx context.Context, jobID string, taskID string, res datatype.VarMap, resErr error, log fmt.Stringer) error
 }
 
 // Executor processes new tasks.
 type Executor struct {
-	jobSvc  jobService
-	l       zerolog.Logger
-	stopped chan struct{}
+	jobSvc       jobService
+	pollInterval time.Duration
+	logBufSize   int
+	l            zerolog.Logger
+	stopped      chan struct{}
 }
 
-func New(jobSvc jobService, l zerolog.Logger) *Executor {
+func New(jobSvc jobService, pollInterval time.Duration, logBufSize int, l zerolog.Logger) *Executor {
 	return &Executor{
-		jobSvc:  jobSvc,
-		l:       l,
-		stopped: make(chan struct{}),
+		jobSvc:       jobSvc,
+		pollInterval: pollInterval,
+		logBufSize:   logBufSize,
+		l:            l,
+		stopped:      make(chan struct{}),
 	}
 }
 
@@ -44,7 +48,7 @@ func (e *Executor) Run(ctx context.Context) error {
 		case <-time.After(sleep):
 		}
 
-		sleep = time.Second * 5
+		sleep = e.pollInterval
 
 		tasks, err := e.jobSvc.FindTasksByStatus(ctx, status.New, 10)
 		if err != nil {
@@ -70,7 +74,9 @@ func (e *Executor) execute(ctx context.Context, t job.Task) error {
 		return fmt.Errorf("invalid task: %w", err)
 	}
 
-	eng, err := engine.New(t.Engine, t.Opts, e.l)
+	tLog := newLogger(e.logBufSize)
+
+	eng, err := engine.New(t.Engine, t.Opts, tLog, e.l)
 	if err != nil {
 		return fmt.Errorf("step %d: instantiate engine: %w", t.StepID, err)
 	}
@@ -84,7 +90,7 @@ func (e *Executor) execute(ctx context.Context, t job.Task) error {
 		Msg("task started")
 
 	res, exErr := eng.Execute(t.Args)
-	if err := e.jobSvc.CompleteTask(ctx, t.JobID, t.ID, res, exErr); err != nil {
+	if err := e.jobSvc.CompleteTask(ctx, t.JobID, t.ID, res, exErr, tLog); err != nil {
 		return fmt.Errorf("job service: complete task: %w", err)
 	}
 

@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -71,7 +72,7 @@ func (Engine) EnumDescriptor() ([]byte, []int) {
 type Step struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Engine        Engine                 `protobuf:"varint,1,opt,name=engine,proto3,enum=joex.v1.Engine" json:"engine,omitempty"`
-	Opts          map[string]*Arg        `protobuf:"bytes,2,rep,name=opts,proto3" json:"opts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Opts          *structpb.Struct       `protobuf:"bytes,2,opt,name=opts,proto3" json:"opts,omitempty"`
 	AllowFail     bool                   `protobuf:"varint,3,opt,name=allow_fail,json=allowFail,proto3" json:"allow_fail,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -114,7 +115,7 @@ func (x *Step) GetEngine() Engine {
 	return Engine_ENGINE_UNSPECIFIED
 }
 
-func (x *Step) GetOpts() map[string]*Arg {
+func (x *Step) GetOpts() *structpb.Struct {
 	if x != nil {
 		return x.Opts
 	}
@@ -220,15 +221,12 @@ var File_joex_v1_pipeline_proto protoreflect.FileDescriptor
 
 const file_joex_v1_pipeline_proto_rawDesc = "" +
 	"\n" +
-	"\x16joex/v1/pipeline.proto\x12\ajoex.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16joex/v1/datatype.proto\"\xca\x01\n" +
+	"\x16joex/v1/pipeline.proto\x12\ajoex.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1bbuf/validate/validate.proto\"\x83\x01\n" +
 	"\x04Step\x12/\n" +
 	"\x06engine\x18\x01 \x01(\x0e2\x0f.joex.v1.EngineB\x06\xbaH\x03\xc8\x01\x01R\x06engine\x12+\n" +
-	"\x04opts\x18\x02 \x03(\v2\x17.joex.v1.Step.OptsEntryR\x04opts\x12\x1d\n" +
+	"\x04opts\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x04opts\x12\x1d\n" +
 	"\n" +
-	"allow_fail\x18\x03 \x01(\bR\tallowFail\x1aE\n" +
-	"\tOptsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\"\n" +
-	"\x05value\x18\x02 \x01(\v2\f.joex.v1.ArgR\x05value:\x028\x01\"F\n" +
+	"allow_fail\x18\x03 \x01(\bR\tallowFail\"F\n" +
 	"\x15CreatePipelineRequest\x12-\n" +
 	"\x05steps\x18\x01 \x03(\v2\r.joex.v1.StepB\b\xbaH\x05\x92\x01\x02\b\x01R\x05steps\"(\n" +
 	"\x16CreatePipelineResponse\x12\x0e\n" +
@@ -253,27 +251,25 @@ func file_joex_v1_pipeline_proto_rawDescGZIP() []byte {
 }
 
 var file_joex_v1_pipeline_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_joex_v1_pipeline_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_joex_v1_pipeline_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_joex_v1_pipeline_proto_goTypes = []any{
 	(Engine)(0),                    // 0: joex.v1.Engine
 	(*Step)(nil),                   // 1: joex.v1.Step
 	(*CreatePipelineRequest)(nil),  // 2: joex.v1.CreatePipelineRequest
 	(*CreatePipelineResponse)(nil), // 3: joex.v1.CreatePipelineResponse
-	nil,                            // 4: joex.v1.Step.OptsEntry
-	(*Arg)(nil),                    // 5: joex.v1.Arg
+	(*structpb.Struct)(nil),        // 4: google.protobuf.Struct
 }
 var file_joex_v1_pipeline_proto_depIdxs = []int32{
 	0, // 0: joex.v1.Step.engine:type_name -> joex.v1.Engine
-	4, // 1: joex.v1.Step.opts:type_name -> joex.v1.Step.OptsEntry
+	4, // 1: joex.v1.Step.opts:type_name -> google.protobuf.Struct
 	1, // 2: joex.v1.CreatePipelineRequest.steps:type_name -> joex.v1.Step
-	5, // 3: joex.v1.Step.OptsEntry.value:type_name -> joex.v1.Arg
-	2, // 4: joex.v1.PipelineService.CreatePipeline:input_type -> joex.v1.CreatePipelineRequest
-	3, // 5: joex.v1.PipelineService.CreatePipeline:output_type -> joex.v1.CreatePipelineResponse
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	2, // 3: joex.v1.PipelineService.CreatePipeline:input_type -> joex.v1.CreatePipelineRequest
+	3, // 4: joex.v1.PipelineService.CreatePipeline:output_type -> joex.v1.CreatePipelineResponse
+	4, // [4:5] is the sub-list for method output_type
+	3, // [3:4] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_joex_v1_pipeline_proto_init() }
@@ -281,14 +277,13 @@ func file_joex_v1_pipeline_proto_init() {
 	if File_joex_v1_pipeline_proto != nil {
 		return
 	}
-	file_joex_v1_datatype_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_joex_v1_pipeline_proto_rawDesc), len(file_joex_v1_pipeline_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   4,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

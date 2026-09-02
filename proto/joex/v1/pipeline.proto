@@ -1,8 +1,8 @@
 syntax = "proto3";
 package joex.v1;
 
+import "google/protobuf/struct.proto";
 import "buf/validate/validate.proto";
-import "joex/v1/datatype.proto";
 
 enum Engine {
   ENGINE_UNSPECIFIED = 0;
@@ -11,7 +11,7 @@ enum Engine {
 
 message Step {
   Engine engine = 1 [(buf.validate.field).required = true];
-  map<string, Arg> opts = 2;
+  google.protobuf.Struct opts = 2;
   bool allow_fail = 3;
 };
 

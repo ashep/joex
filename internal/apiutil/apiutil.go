@@ -1,31 +1,40 @@
 package apiutil
 
 import (
+	"fmt"
+	"strings"
+
+	apperr "github.com/ashep/go-app/errors"
 	"github.com/ashep/joex/internal/datatype"
-	proto "github.com/ashep/joex/sdk/proto/joex/v1"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func MapProtoDataTypeArgs(args map[string]*proto.Arg) (datatype.VarMap, error) {
-	res := make(datatype.VarMap, len(args))
-	for name, opt := range args {
-		if err := res.Set(name, mapDataType(args[name].GetType()), opt.Value); err != nil {
+func MapProtoStructToDataType(args *structpb.Struct) (datatype.VarMap, error) {
+	fields := args.GetFields()
+	res := make(datatype.VarMap, len(fields))
+	for k, v := range fields {
+		var err error
+
+		k = strings.TrimSpace(k)
+		if k == "" {
+			return nil, apperr.NewRequiredArg("key")
+		}
+
+		switch kT := v.GetKind().(type) {
+		case *structpb.Value_BoolValue:
+			err = res.SetBool(k, fmt.Sprintf("%v", v.GetBoolValue()))
+		case *structpb.Value_NumberValue:
+			err = res.SetNumber(k, fmt.Sprintf("%v", v.GetNumberValue()))
+		case *structpb.Value_StringValue:
+			err = res.SetString(k, v.GetStringValue())
+		default:
+			err = apperr.NewInvalidArg(k, fmt.Sprintf("unexpected type: %T", kT))
+		}
+
+		if err != nil {
 			return nil, err
 		}
 	}
-	return res, nil
-}
 
-func mapDataType(arg proto.DataType) datatype.Type {
-	switch arg {
-	case proto.DataType_DATA_TYPE_BOOL:
-		return datatype.Bool
-	case proto.DataType_DATA_TYPE_INT:
-		return datatype.Int
-	case proto.DataType_DATA_TYPE_FLOAT:
-		return datatype.Float
-	case proto.DataType_DATA_TYPE_STRING:
-		return datatype.String
-	default:
-		return datatype.Unknown
-	}
+	return res, nil
 }

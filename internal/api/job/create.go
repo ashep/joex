@@ -12,7 +12,7 @@ import (
 func (h *Handler) CreateJob(ctx context.Context, req *proto.CreateJobRequest) (*proto.CreateJobResponse, error) {
 	h.l.Info().Str("pipeline_id", req.GetPipelineId()).Msg("create job request")
 
-	args, err := apiutil.MapProtoDataTypeArgs(req.GetArgs())
+	args, err := apiutil.MapProtoStructToDataType(req.GetArgs())
 	if err != nil {
 		return nil, connecterr.New(fmt.Errorf("validate args: %w", err), h.l)
 	}

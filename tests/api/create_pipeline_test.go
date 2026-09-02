@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateJob(main *testing.T) {
+func TestCreatePipeline(main *testing.T) {
 	main.Parallel()
 
 	main.Run("EmptyAuthorizationToken", func(t *testing.T) {

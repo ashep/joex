@@ -1,6 +1,7 @@
 package engine_test
 
 import (
+	"io"
 	"testing"
 
 	apperr "github.com/ashep/go-app/errors"
@@ -125,7 +126,7 @@ func TestNew(main *testing.T) {
 		t.Parallel()
 
 		for _, typ := range unsupportedTypes() {
-			e, err := engine.New(typ, validJSOpts(t), zerolog.Nop())
+			e, err := engine.New(typ, validJSOpts(t), nopWriteCloser{io.Discard}, zerolog.Nop())
 
 			requireUnsupportedEngineError(t, err, typ)
 			assert.Nil(t, e)
@@ -135,7 +136,7 @@ func TestNew(main *testing.T) {
 	main.Run("JS", func(t *testing.T) {
 		t.Parallel()
 
-		e, err := engine.New(engine.JS, validJSOpts(t), zerolog.Nop())
+		e, err := engine.New(engine.JS, validJSOpts(t), nopWriteCloser{io.Discard}, zerolog.Nop())
 
 		require.NoError(t, err)
 		require.NotNil(t, e)
@@ -144,7 +145,7 @@ func TestNew(main *testing.T) {
 	main.Run("JSInvalidOpts", func(t *testing.T) {
 		t.Parallel()
 
-		e, err := engine.New(engine.JS, datatype.VarMap{}, zerolog.Nop())
+		e, err := engine.New(engine.JS, datatype.VarMap{}, nopWriteCloser{io.Discard}, zerolog.Nop())
 
 		require.Error(t, err)
 		assert.Nil(t, e)
@@ -153,3 +154,9 @@ func TestNew(main *testing.T) {
 		assert.NotErrorAs(t, err, &argErr, "engine opts errors must not be reported as an unsupported engine")
 	})
 }
+
+type nopWriteCloser struct {
+	io.Writer
+}
+
+func (nopWriteCloser) Close() error { return nil }
